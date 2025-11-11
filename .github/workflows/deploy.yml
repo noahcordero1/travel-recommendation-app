@@ -67,6 +67,14 @@ jobs:
 
           echo "Lambda functions updated successfully"
 
+      - name: Upload destinations data to S3
+        run: |
+          # Upload destinations.json to S3 for Lambda to read
+          aws s3 cp data/destinations.json s3://${{ env.S3_FRONTEND_BUCKET }}/static-data/destinations.json \
+            --content-type "application/json"
+
+          echo "Destinations data uploaded to S3"
+
       - name: Deploy frontend to S3
         run: |
           # Upload main auth page (index.html)

@@ -179,6 +179,42 @@
         "public_transport_score": 8.8,
         "safety_score": 8.5
       }
+    },
+    {
+      "city_id": "lisbon-pt",
+      "city": "Lisbon",
+      "country": "Portugal",
+      "iata_code": "LIS",
+      "coordinates": {
+        "lat": 38.7223,
+        "lon": -9.1393
+      },
+      "quality_of_life": {
+        "beer_price_eur": 3.5,
+        "michelin_restaurants": 8,
+        "food_quality_score": 8.8,
+        "walkability_score": 8.9,
+        "public_transport_score": 7.8,
+        "safety_score": 8.2
+      }
+    },
+    {
+      "city_id": "vienna-at",
+      "city": "Vienna",
+      "country": "Austria",
+      "iata_code": "VIE",
+      "coordinates": {
+        "lat": 48.2082,
+        "lon": 16.3738
+      },
+      "quality_of_life": {
+        "beer_price_eur": 4.5,
+        "michelin_restaurants": 17,
+        "food_quality_score": 9.1,
+        "walkability_score": 9.3,
+        "public_transport_score": 9.6,
+        "safety_score": 9.2
+      }
     }
   ]
 }
