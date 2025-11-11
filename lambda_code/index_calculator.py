@@ -156,14 +156,20 @@ def calculate_flight_score(price):
     return score
 
 
-def calculate_total_score(weather_score, qol_score, flight_score):
+def calculate_total_score(weather_score, qol_score, flight_score, weather_weight=None, qol_weight=None, flight_weight=None):
     """
     Calculate total weighted score
-    Weather: 30%, QoL: 30%, Flight: 40%
+    Default: Weather: 30%, QoL: 30%, Flight: 40%
+    Can be customized with weight parameters
     """
-    total = (weather_score * WEATHER_WEIGHT +
-             qol_score * QOL_WEIGHT +
-             flight_score * FLIGHT_WEIGHT)
+    # Use provided weights or fall back to defaults
+    w_weather = weather_weight if weather_weight is not None else WEATHER_WEIGHT
+    w_qol = qol_weight if qol_weight is not None else QOL_WEIGHT
+    w_flight = flight_weight if flight_weight is not None else FLIGHT_WEIGHT
+
+    total = (weather_score * w_weather +
+             qol_score * w_qol +
+             flight_score * w_flight)
 
     return total
 
@@ -188,6 +194,28 @@ def handler(event, context):
 
         departure_airport = body.get('departure_airport', '').strip().upper()
         alternatives = body.get('alternatives', [])  # Optional alternative airports
+
+        # Get custom weights from request (or use defaults)
+        custom_weights = body.get('weights', {})
+        weather_weight = float(custom_weights.get('weather', WEATHER_WEIGHT))
+        qol_weight = float(custom_weights.get('qol', QOL_WEIGHT))
+        flight_weight = float(custom_weights.get('flight', FLIGHT_WEIGHT))
+
+        # Validate weights sum to approximately 1.0
+        total_weight = weather_weight + qol_weight + flight_weight
+        if abs(total_weight - 1.0) > 0.01:  # Allow small floating point errors
+            return {
+                'statusCode': 400,
+                'headers': {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*'
+                },
+                'body': json.dumps({
+                    'error': f'Weights must sum to 1.0 (got {total_weight})'
+                })
+            }
+
+        print(f"Using weights - Weather: {weather_weight}, QoL: {qol_weight}, Flight: {flight_weight}")
 
         if not departure_airport:
             return {
@@ -291,8 +319,8 @@ def handler(event, context):
         qol_score = calculate_qol_score(qol_data)
         flight_score = calculate_flight_score(flight_price)
 
-        # Calculate total score
-        total_score = calculate_total_score(weather_score, qol_score, flight_score)
+        # Calculate total score with custom weights
+        total_score = calculate_total_score(weather_score, qol_score, flight_score, weather_weight, qol_weight, flight_weight)
 
         scored_destinations.append({
             'city_id': city_id,
@@ -335,9 +363,9 @@ def handler(event, context):
             'departure_airport': departure_airport,
             'recommendations': top_3,
             'weights': {
-                'weather': WEATHER_WEIGHT,
-                'qol': QOL_WEIGHT,
-                'flight': FLIGHT_WEIGHT
+                'weather': weather_weight,
+                'qol': qol_weight,
+                'flight': flight_weight
             }
         })
     }

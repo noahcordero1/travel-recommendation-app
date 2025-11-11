@@ -590,6 +590,43 @@
                 <strong>Note:</strong> Calculating recommendations takes 10-15 seconds as we search real-time flight prices for all 10 destinations in parallel.
             </div>
 
+            <!-- Weight Adjustment Controls -->
+            <div class="weight-controls" style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                <h3 style="margin-bottom: 15px; font-size: 1.1rem;">Customize Your Preferences</h3>
+                <p style="color: #666; font-size: 0.9rem; margin-bottom: 15px;">Adjust the importance of each factor (must total 100%)</p>
+
+                <div style="margin-bottom: 15px;">
+                    <label style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                        <span>🌤️ Weather</span>
+                        <strong id="weatherWeightValue">30%</strong>
+                    </label>
+                    <input type="range" id="weatherWeight" min="0" max="100" value="30" step="5"
+                           style="width: 100%;" oninput="updateWeights('weather')">
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <label style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                        <span>🏙️ Quality of Life</span>
+                        <strong id="qolWeightValue">30%</strong>
+                    </label>
+                    <input type="range" id="qolWeight" min="0" max="100" value="30" step="5"
+                           style="width: 100%;" oninput="updateWeights('qol')">
+                </div>
+
+                <div style="margin-bottom: 10px;">
+                    <label style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                        <span>✈️ Flight Price</span>
+                        <strong id="flightWeightValue">40%</strong>
+                    </label>
+                    <input type="range" id="flightWeight" min="0" max="100" value="40" step="5"
+                           style="width: 100%;" oninput="updateWeights('flight')">
+                </div>
+
+                <div id="weightWarning" style="color: #dc3545; font-size: 0.9rem; display: none; margin-top: 10px;">
+                    ⚠️ Weights must total 100%
+                </div>
+            </div>
+
             <button id="getRecommendationsBtn" onclick="getRecommendations()" style="margin-bottom: 20px;">
                 Get My Top 3 Recommendations
             </button>
@@ -992,10 +1029,64 @@
             }
         }
 
+        // Weight management functions
+        function getCurrentWeights() {
+            const weatherWeight = parseInt(document.getElementById('weatherWeight').value) / 100;
+            const qolWeight = parseInt(document.getElementById('qolWeight').value) / 100;
+            const flightWeight = parseInt(document.getElementById('flightWeight').value) / 100;
+
+            return {
+                weather: weatherWeight,
+                qol: qolWeight,
+                flight: flightWeight
+            };
+        }
+
+        function updateWeights(changedSlider) {
+            const weatherSlider = document.getElementById('weatherWeight');
+            const qolSlider = document.getElementById('qolWeight');
+            const flightSlider = document.getElementById('flightWeight');
+
+            const weatherValue = document.getElementById('weatherWeightValue');
+            const qolValue = document.getElementById('qolWeightValue');
+            const flightValue = document.getElementById('flightWeightValue');
+            const warning = document.getElementById('weightWarning');
+
+            // Update the display for the changed slider
+            const weather = parseInt(weatherSlider.value);
+            const qol = parseInt(qolSlider.value);
+            const flight = parseInt(flightSlider.value);
+
+            weatherValue.textContent = `${weather}%`;
+            qolValue.textContent = `${qol}%`;
+            flightValue.textContent = `${flight}%`;
+
+            // Check if weights sum to 100%
+            const total = weather + qol + flight;
+
+            if (total !== 100) {
+                warning.style.display = 'block';
+                warning.textContent = `⚠️ Weights total ${total}% (must be 100%)`;
+            } else {
+                warning.style.display = 'none';
+            }
+        }
+
         // Get travel recommendations
         async function getRecommendations() {
             if (!userDepartureAirport) {
                 alert('Please find your nearest airport first!');
+                return;
+            }
+
+            // Validate weights sum to 100%
+            const weatherPct = parseInt(document.getElementById('weatherWeight').value);
+            const qolPct = parseInt(document.getElementById('qolWeight').value);
+            const flightPct = parseInt(document.getElementById('flightWeight').value);
+            const total = weatherPct + qolPct + flightPct;
+
+            if (total !== 100) {
+                alert(`Weights must total 100% (currently ${total}%). Please adjust the sliders.`);
                 return;
             }
 
@@ -1029,12 +1120,16 @@
 
                 console.log('Sending request to travel-recommendations with token:', token.substring(0, 20) + '...');
 
+                // Get current weights from sliders (convert from percentage to decimal)
+                const weights = getCurrentWeights();
+
                 const response = await fetch(`${API_ENDPOINT}/travel-recommendations`, {
                     method: 'POST',
                     headers: headers,
                     body: JSON.stringify({
                         departure_airport: userDepartureAirport,
-                        alternatives: userAirportAlternatives
+                        alternatives: userAirportAlternatives,
+                        weights: weights
                     })
                 });
 
