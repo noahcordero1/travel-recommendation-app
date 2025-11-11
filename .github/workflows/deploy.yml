@@ -69,8 +69,13 @@ jobs:
 
       - name: Deploy frontend to S3
         run: |
-          # Upload frontend files with cache-control
+          # Upload main auth page (index.html)
           aws s3 cp frontend/index.html s3://${{ env.S3_FRONTEND_BUCKET }}/ \
+            --cache-control "no-cache, no-store, must-revalidate" \
+            --content-type "text/html"
+
+          # Upload main app (index-original.html)
+          aws s3 cp frontend/index-original.html s3://${{ env.S3_FRONTEND_BUCKET }}/ \
             --cache-control "no-cache, no-store, must-revalidate" \
             --content-type "text/html"
 
