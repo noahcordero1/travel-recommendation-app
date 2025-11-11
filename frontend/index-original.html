@@ -609,17 +609,33 @@
         // API Gateway endpoint
         const API_ENDPOINT = 'https://e4ml7tmfog.execute-api.eu-west-1.amazonaws.com';
 
-        // Authentication token (received from parent auth page)
-        let authToken = sessionStorage.getItem('idToken') || null;
+        // Authentication token (read from localStorage - shared with parent page)
+        let authToken = localStorage.getItem('idToken') || null;
 
-        // Listen for auth token from parent window
+        // Listen for auth token from parent window (backup method)
         window.addEventListener('message', (event) => {
             if (event.data && event.data.type === 'AUTH_TOKEN') {
                 authToken = event.data.token;
-                sessionStorage.setItem('idToken', authToken);
-                console.log('Auth token received');
+                localStorage.setItem('idToken', authToken);
+                console.log('Auth token received via postMessage');
             }
         });
+
+        // Also check localStorage periodically in case it was set by parent
+        if (!authToken) {
+            const checkToken = setInterval(() => {
+                authToken = localStorage.getItem('idToken');
+                if (authToken) {
+                    console.log('Auth token found in localStorage');
+                    clearInterval(checkToken);
+                }
+            }, 100);
+
+            // Stop checking after 5 seconds
+            setTimeout(() => clearInterval(checkToken), 5000);
+        } else {
+            console.log('Auth token loaded from localStorage');
+        }
 
         // Display API endpoint
         document.getElementById('apiEndpoint').textContent = API_ENDPOINT + '/weather';

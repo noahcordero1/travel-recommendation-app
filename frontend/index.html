@@ -489,14 +489,14 @@
         }
 
         function showApp(token) {
-            // Store token for API requests
-            sessionStorage.setItem('idToken', token);
+            // Store token for API requests (use localStorage so iframe can access it)
+            localStorage.setItem('idToken', token);
 
             // Hide auth screen, show app
             document.getElementById('auth-screen').style.display = 'none';
             document.getElementById('app').classList.add('active');
 
-            // Pass token to iframe
+            // Pass token to iframe via postMessage as backup
             const iframe = document.getElementById('app-iframe');
             iframe.onload = function() {
                 iframe.contentWindow.postMessage({
@@ -511,7 +511,7 @@
             if (currentUser) {
                 currentUser.signOut();
             }
-            sessionStorage.removeItem('idToken');
+            localStorage.removeItem('idToken');
 
             document.getElementById('app').classList.remove('active');
             document.getElementById('auth-screen').style.display = 'flex';
