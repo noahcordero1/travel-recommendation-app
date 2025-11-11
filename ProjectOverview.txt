@@ -1,0 +1,134 @@
+Travel Help – Intelligent Cloud-Based Travel Recommendation Platform
+This project is a cloud-based, serverless intelligent travel recommendation platform named Travel Help, designed to help travelers make informed destination decisions by combining real-time 
+environmental data, static lifestyle metrics, and flight price data into a unified ranking system.
+ 
+Core Concept
+Travel Help addresses the common dilemma travelers face in choosing optimal destinations based on multiple factors that matter, such as weather, affordability, culinary quality, and travel cost. 
+Unlike platforms providing isolated data, Travel Help synthesizes dynamic weather forecasts, static quality-of-life indicators, and real-time flight prices, producing a comprehensive Travel Help 
+Index score for each city.
+ 
+Architecture and Components
+The solution is built on a fully serverless AWS architecture comprising AWS Lambda, Amazon S3, DynamoDB, API Gateway, EventBridge, Step Functions, Amazon Cognito, and Mapbox GL for frontend 
+visualization.
+Data Acquisition
+Lambda functions periodically fetch real-time weather data from the OpenWeatherMap API. There will be a predefined list of destinations one can travel to. The table containing these destinations 
+will have hardcoded quality-of-life metrics and will then periodically be updated with the weather data. Flight data will only be updated at user request.
+Static Quality-of-Life Metrics
+These are randomly generated once per city (such as beer prices, Michelin restaurant counts, and food quality scores) during system setup or city addition, then stored as immutable datasets (e.g., 
+in S3). The metrics remain static to provide a stable baseline, ensuring a consistent user experience.
+Data Enrichment
+A Lambda function enriches freshly fetched weather and flight price data with the static quality-of-life metrics, combining them into comprehensive city records.
+Index Calculation
+Another Lambda applies a weighted formula to normalize and combine the components — weather (e.g., temperature comfort, precipitation, humidity), affordability (inverse of beer prices), culinary 
+quality, and flight prices — into a single score per city. This formula is configurable by ranking what the user finds most important from 1–x, which is possible on the frontend.
+Data Storage
+Real-time indexes with detailed component data are stored in DynamoDB for fast access, while full details and historical data are archived in an S3 data lake, with Athena enabling rich analytical 
+queries over trends and seasonality.
+Workflow Orchestration
+AWS Step Functions coordinate the data pipeline — fetching weather, flight prices, enriching data, calculating indexes, writing to storage, and sending notifications — with robust error handling and 
+retry policies.
+ 
+New Integration: Hugging Face API for Nearest Airport Detection
+To enhance user experience and enable accurate flight price lookups, Travel Help integrates a Hugging Face API that determines the nearest airport to the user’s home city and country.
+When a user inputs their home city and country, a Lambda function calls a Hugging Face inference model that returns the closest airport along with its IATA code and coordinates. This information is 
+essential, as the flight price API requires a specific departure airport code to calculate routes and prices.
+If the Hugging Face model fails to return a valid airport, the system falls back to a local airport dataset or a deterministic lookup method using the city’s coordinates to identify the nearest 
+major airport.
+This feature ensures users can enter their location naturally while the system intelligently resolves it to a valid airport — simplifying input and improving accuracy for downstream flight pricing 
+queries.
+Hardcoded Destination Cities
+Travel Help begins with a predefined set of 10 major international destinations. These are stored in DynamoDB with static quality-of-life metrics and are periodically updated with new weather data. 
+Each destination includes a known primary airport (IATA code), city coordinates, and static metrics.
+City	Country	IATA Code
+London	United Kingdom	LHR
+Paris	France	CDG
+New York City	USA	JFK
+Tokyo	Japan	HND
+Sydney	Australia	SYD
+Dubai	UAE	DXB
+Singapore	Singapore	SIN
+Barcelona	Spain	BCN
+Rome	Italy	FCO
+Amsterdam	Netherlands	AMS
+These destinations act as the initial fixed set for flight and weather data aggregation, providing a consistent foundation for Travel Help’s recommendation engine.
+ 
+System Goals and Design Focus
+•	Ensuring quality-of-life metrics are randomly generated once per city and remain static thereafter.
+•	Making the weighting scheme flexible and user-customizable to reflect individual preferences.
+•	Providing historical trend analysis and alerts for city ranking changes via SNS/SQS.
+•	Efficiently resolving the nearest airport to the user’s home location using the Hugging Face API.
+•	Maintaining scalability and cost efficiency through serverless AWS services.
+ 
+Benefits
+•	Highly scalable and cost-efficient due to serverless design.
+•	Combines multiple data dimensions (weather, affordability, culinary, flight cost) into a unified recommendation.
+•	Smooth, interactive user experience with real-time data visualization.
+•	Extensible architecture, enabling future features such as route optimization, accommodation booking, or personalized ML-driven recommendations.
+ 
+Step-by-Step System Workflow
+The following sequence describes the complete flow from user input to result delivery:
+ 
+1. User Input
+•	The user signs in (via Cognito) and provides their home city and country in the frontend form, along with their travel preferences (importance weights for weather, cost, culinary quality, 
+etc.).
+ 
+2. Airport Resolution (Hugging Face Integration)
+•	The frontend sends the user’s input to the backend (API Gateway → Lambda).
+•	The Lambda normalizes the text and sends it to the Hugging Face API with a prompt such as:
+“Find the nearest airport to Lagos, Nigeria and return its IATA code and coordinates.”
+•	The Hugging Face model returns structured data like:
+•	{ "iata": "LOS", "name": "Murtala Muhammed International Airport", "lat": 6.577, "lon": 3.321 }
+•	The Lambda validates the airport using a local dataset, then caches the mapping (city+country → IATA) in DynamoDB for reuse.
+•	If the Hugging Face API fails, the system uses a fallback lookup (e.g., Mapbox or local geo-distance matching).
+ 
+3. Destination Selection
+•	The system retrieves the 10 predefined destination cities (and their IATA codes).
+•	These form the target list for all weather, QoL, and flight data lookups.
+ 
+4. Flight Price Retrieval
+•	When the user requests recommendations, a Step Functions workflow begins.
+•	A Lambda function queries a flight API (e.g., Amadeus, Skyscanner) for each destination using the user’s origin IATA and the destination IATA.
+•	The results are stored temporarily in DynamoDB.
+ 
+5. Weather and QoL Data Integration
+•	A scheduled Lambda updates each destination’s weather data from OpenWeatherMap.
+•	QoL metrics (beer prices, restaurant density, etc.) are read from S3, where they were generated once per city during setup.
+•	The data for each destination is combined into a unified structure containing:
+o	Static QoL metrics
+o	Real-time weather
+o	Flight prices
+ 
+6. Index Calculation
+•	Another Lambda computes the Travel Help Index using a configurable weighted formula that reflects user priorities:
+•	Index = (w1 * WeatherScore) + (w2 * AffordabilityScore) +
+•	        (w3 * CulinaryScore) + (w4 * FlightPriceScore)
+•	Each score is normalized on a 0–1 scale before combining.
+ 
+7. Storage and Output
+•	Final ranked city results are saved in DynamoDB (for immediate access) and archived to S3 (for long-term analytics via Athena).
+•	The API returns the ranked list of destinations and breakdowns to the frontend.
+ 
+8. Visualization and User Interaction
+•	The frontend visualizes results using Mapbox GL, showing the origin and destination airports on a map.
+•	Users can adjust their weighting preferences and re-query in real time to see updated rankings.
+ 
+9. Notifications and History
+•	Users can subscribe to alerts via SNS, e.g., when flight prices drop or when a city’s rank changes significantly.
+•	Historical data is stored in the S3 data lake, enabling long-term trend and seasonality analysis.
+ 
+End-to-End Summary
+1.	User enters city + country from where they start their and preferences.
+2.	Hugging Face API resolves the closest airport (IATA).
+3.	System retrieves 10 hardcoded destination airports/ cities.
+4.	Lambda queries flight prices from origin → destinations.
+5.	Weather data is updated for each destination through the API.
+6.	QoL metrics are combined with dynamic data.
+7.	Weighted scoring produces the Travel Help Index.
+8.	Results are stored, ranked, and visualized for the user.
+9.	Top 3 results are given to the user as a list along with a score and special recommendations given through the huggingface api
+ 
+Future Extensions
+•	Expand destinations dynamically using a city dataset.
+
+
+

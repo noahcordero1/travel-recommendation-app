@@ -1,0 +1,1250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Travel Help - Intelligent Travel Recommendations</title>
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+          crossorigin=""/>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+            crossorigin=""></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .controls {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .status {
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        .status.loading {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .status.error {
+            color: #e53e3e;
+            font-weight: 600;
+        }
+
+        .status.success {
+            color: #38a169;
+            font-weight: 600;
+        }
+
+        .destinations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 24px;
+            margin-top: 20px;
+        }
+
+        .destination-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .destination-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 16px;
+        }
+
+        .city-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2d3748;
+        }
+
+        .country {
+            font-size: 0.9rem;
+            color: #718096;
+            margin-top: 4px;
+        }
+
+        .iata-code {
+            background: #667eea;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .weather-section {
+            background: #f7fafc;
+            padding: 16px;
+            border-radius: 8px;
+            margin: 16px 0;
+        }
+
+        .weather-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .temperature {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .weather-description {
+            color: #4a5568;
+            font-size: 0.95rem;
+            text-transform: capitalize;
+        }
+
+        .weather-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 12px;
+            font-size: 0.85rem;
+            color: #718096;
+        }
+
+        .qol-section {
+            margin-top: 16px;
+        }
+
+        .qol-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #4a5568;
+            margin-bottom: 12px;
+        }
+
+        .qol-grid {
+            display: grid;
+            gap: 8px;
+        }
+
+        .qol-item {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: #718096;
+            padding: 6px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .qol-item:last-child {
+            border-bottom: none;
+        }
+
+        .qol-value {
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .no-weather {
+            color: #e53e3e;
+            font-size: 0.9rem;
+            font-style: italic;
+            text-align: center;
+            padding: 12px;
+        }
+
+        .api-info {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            color: #4a5568;
+            border-left: 4px solid #667eea;
+        }
+
+        .api-endpoint {
+            font-family: monospace;
+            background: #f7fafc;
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-top: 8px;
+            word-break: break-all;
+            font-size: 0.85rem;
+        }
+
+        .airport-resolver {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .airport-resolver h2 {
+            font-size: 1.5rem;
+            margin-bottom: 16px;
+            color: #2d3748;
+        }
+
+        .input-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .input-group input {
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .airport-result {
+            background: #f7fafc;
+            padding: 16px;
+            border-radius: 8px;
+            margin-top: 16px;
+            display: none;
+        }
+
+        .airport-result.show {
+            display: block;
+        }
+
+        .airport-code {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+
+        .airport-name {
+            font-size: 1.1rem;
+            color: #2d3748;
+            margin-bottom: 4px;
+        }
+
+        .airport-location {
+            font-size: 0.9rem;
+            color: #718096;
+        }
+
+        .recommendations-section {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            display: none;
+        }
+
+        .recommendations-section.show {
+            display: block;
+        }
+
+        .recommendations-section h2 {
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+
+        .recommendations-note {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 12px;
+            margin: 15px 0;
+            font-size: 0.9rem;
+            color: #856404;
+            border-radius: 4px;
+        }
+
+        .recommendation-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 24px;
+            border-radius: 12px;
+            margin: 20px 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            position: relative;
+        }
+
+        .recommendation-rank {
+            position: absolute;
+            top: -10px;
+            right: 20px;
+            background: #ffc107;
+            color: #333;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .recommendation-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 16px;
+        }
+
+        .recommendation-city {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .recommendation-country {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .recommendation-score {
+            text-align: right;
+        }
+
+        .score-total {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .score-label {
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+
+        .score-breakdown {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+            margin: 16px 0;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+        }
+
+        .score-item {
+            text-align: center;
+        }
+
+        .score-item-label {
+            font-size: 0.85rem;
+            opacity: 0.9;
+            margin-bottom: 4px;
+        }
+
+        .score-item-value {
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .recommendation-details {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .detail-item {
+            text-align: center;
+        }
+
+        .detail-value {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .detail-label {
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+
+        .loading-spinner {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            border: 4px solid rgba(102, 126, 234, 0.2);
+            border-left-color: #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .map-container {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .map-container h2 {
+            color: #2d3748;
+            margin-bottom: 15px;
+        }
+
+        #map {
+            height: 500px;
+            width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .leaflet-popup-content-wrapper {
+            border-radius: 8px;
+            padding: 0;
+        }
+
+        .leaflet-popup-content {
+            margin: 0;
+            min-width: 200px;
+        }
+
+        .map-popup {
+            padding: 16px;
+        }
+
+        .map-popup-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 8px;
+        }
+
+        .map-popup-details {
+            font-size: 0.9rem;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .map-popup-score {
+            background: #667eea;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-top: 8px;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            #map {
+                height: 400px;
+            }
+            .input-group {
+                grid-template-columns: 1fr;
+            }
+            h1 {
+                font-size: 2rem;
+            }
+
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Travel Help</h1>
+            <p class="subtitle">Intelligent Cloud-Based Travel Recommendations</p>
+        </header>
+
+        <div class="map-container">
+            <h2>Interactive Travel Map</h2>
+            <div id="map"></div>
+        </div>
+
+        <div class="api-info">
+            <strong>API Status:</strong> Connected to AWS Lambda via API Gateway<br>
+            <div class="api-endpoint" id="apiEndpoint"></div>
+        </div>
+
+        <div class="airport-resolver">
+            <h2>Find Your Nearest Airport</h2>
+            <div class="input-group">
+                <input type="text" id="cityInput" placeholder="Enter your city (e.g., Toledo)" />
+                <input type="text" id="countryInput" placeholder="Enter your country (e.g., Spain)" />
+                <button onclick="resolveAirport()">Find Airport</button>
+            </div>
+            <div class="airport-result" id="airportResult">
+                <div class="airport-code" id="airportCode"></div>
+                <div class="airport-name" id="airportName"></div>
+                <div class="airport-location" id="airportLocation"></div>
+            </div>
+        </div>
+
+        <div class="recommendations-section" id="recommendationsSection">
+            <h2>Your Personalized Travel Recommendations</h2>
+            <p style="color: #666; margin-bottom: 15px;">Get the top 3 destinations ranked by weather, quality of life, and flight prices from your airport.</p>
+
+            <div class="recommendations-note">
+                <strong>Note:</strong> Calculating recommendations takes 10-15 seconds as we search real-time flight prices for all 10 destinations in parallel.
+            </div>
+
+            <button id="getRecommendationsBtn" onclick="getRecommendations()" style="margin-bottom: 20px;">
+                Get My Top 3 Recommendations
+            </button>
+
+            <div id="recommendationsContent"></div>
+        </div>
+
+        <div class="controls">
+            <div class="status" id="status">Click "Fetch Weather Data" to load destinations</div>
+            <button id="fetchBtn" onclick="fetchDestinations()">Fetch Weather Data</button>
+        </div>
+
+        <div class="destinations-grid" id="destinationsGrid"></div>
+    </div>
+
+    <script>
+        // API Gateway endpoint
+        const API_ENDPOINT = 'https://e4ml7tmfog.execute-api.eu-west-1.amazonaws.com';
+
+        // Display API endpoint
+        document.getElementById('apiEndpoint').textContent = API_ENDPOINT + '/weather';
+
+        // Store user's departure airport
+        let userDepartureAirport = null;
+        let userDepartureCoords = null;
+        let userAirportAlternatives = [];
+
+        // ===================================
+        // MAP INITIALIZATION
+        // ===================================
+        let map = null;
+        let departureMarker = null;
+        let destinationMarkers = [];
+        let flightPaths = [];
+
+        // Initialize map on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            // Create map centered on Europe
+            map = L.map('map').setView([50.0, 10.0], 4);
+
+            // Add OpenStreetMap tiles
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors',
+                maxZoom: 19
+            }).addTo(map);
+        });
+
+        // Create custom colored icon
+        function createCustomIcon(color, emoji) {
+            return L.divIcon({
+                className: 'custom-marker',
+                html: `<div style="
+                    background-color: ${color};
+                    width: 40px;
+                    height: 40px;
+                    border-radius: 50% 50% 50% 0;
+                    transform: rotate(-45deg);
+                    border: 3px solid white;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                ">
+                    <span style="transform: rotate(45deg); font-size: 20px;">${emoji}</span>
+                </div>`,
+                iconSize: [40, 40],
+                iconAnchor: [20, 40],
+                popupAnchor: [0, -40]
+            });
+        }
+
+        // Add departure marker
+        function addDepartureMarker(lat, lon, airportCode, airportName, city, country) {
+            console.log('addDepartureMarker called:', { lat, lon, airportCode, city, country });
+            console.log('Current departureMarker:', departureMarker);
+
+            // Step 1: Remove old home marker if exists
+            if (departureMarker !== null && departureMarker !== undefined) {
+                console.log('Removing old departure marker');
+                map.removeLayer(departureMarker);
+                departureMarker = null;
+            }
+
+            // Step 2: Create new home marker
+            console.log('Creating new departure marker at', [lat, lon]);
+            departureMarker = L.marker([lat, lon], {
+                icon: createCustomIcon('#4299e1', '🏠')
+            });
+
+            // Step 3: Add popup
+            departureMarker.bindPopup(`
+                <div class="map-popup">
+                    <div class="map-popup-title">Your Departure</div>
+                    <div class="map-popup-details">
+                        <strong>${city}, ${country}</strong><br>
+                        ${airportCode} - ${airportName}
+                    </div>
+                </div>
+            `);
+
+            // Step 4: Add to map
+            departureMarker.addTo(map);
+            console.log('New departure marker added to map');
+
+            // Step 5: Store coordinates
+            userDepartureCoords = [lat, lon];
+
+            // Step 6: Zoom to location
+            map.setView([lat, lon], 6, { animate: true });
+        }
+
+        // Add recommendation markers and flight paths
+        function addRecommendationMarkers(recommendations) {
+            // Clear existing destination markers and paths
+            destinationMarkers.forEach(marker => map.removeLayer(marker));
+            flightPaths.forEach(path => map.removeLayer(path));
+            destinationMarkers = [];
+            flightPaths = [];
+
+            if (!userDepartureCoords) {
+                console.warn('No departure coordinates set');
+                return;
+            }
+
+            // Marker colors and emojis
+            const markerStyles = [
+                { color: '#ffc107', emoji: '🥇' }, // Gold
+                { color: '#c0c0c0', emoji: '🥈' }, // Silver
+                { color: '#cd7f32', emoji: '🥉' }  // Bronze
+            ];
+
+            const bounds = [userDepartureCoords];
+
+            recommendations.forEach((rec, index) => {
+                // Use coordinates from API response (not hardcoded lookup!)
+                if (!rec.latitude || !rec.longitude) {
+                    console.warn(`No coordinates for ${rec.city}, skipping marker`);
+                    return;
+                }
+                const coords = [rec.latitude, rec.longitude];
+
+                bounds.push(coords);
+
+                // Create marker
+                const marker = L.marker(coords, {
+                    icon: createCustomIcon(markerStyles[index].color, markerStyles[index].emoji)
+                }).addTo(map);
+
+                // Create popup
+                marker.bindPopup(`
+                    <div class="map-popup">
+                        <div class="map-popup-title">#${index + 1} ${rec.city}</div>
+                        <div class="map-popup-details">
+                            <strong>${rec.country}</strong> (${rec.iata_code})<br>
+                            🌡️ ${rec.details.avg_temperature}°C<br>
+                            ✈️ ${rec.details.flight_price ? '€' + rec.details.flight_price.toFixed(2) : 'N/A'}<br>
+                            🍽️ ${rec.details.quality_of_life.michelin_restaurants} Michelin ⭐
+                        </div>
+                        <div class="map-popup-score">Score: ${rec.scores.total_score.toFixed(3)}</div>
+                    </div>
+                `);
+
+                destinationMarkers.push(marker);
+
+                // Draw flight path (curved line using polyline)
+                const flightPath = L.polyline([userDepartureCoords, coords], {
+                    color: markerStyles[index].color,
+                    weight: 3,
+                    opacity: 0.7,
+                    dashArray: '10, 10'
+                }).addTo(map);
+
+                flightPaths.push(flightPath);
+            });
+
+            // Auto-zoom to fit all markers
+            if (bounds.length > 1) {
+                map.fitBounds(bounds, { padding: [50, 50], animate: true });
+            }
+        }
+
+        // Get destination coordinates (from hardcoded data)
+        function getDestinationCoords(cityName) {
+            const coords = {
+                'London': [51.5074, -0.1278],
+                'Paris': [48.8566, 2.3522],
+                'New York City': [40.7128, -74.0060],
+                'Tokyo': [35.6762, 139.6503],
+                'Sydney': [-33.8688, 151.2093],
+                'Dubai': [25.2048, 55.2708],
+                'Singapore': [1.3521, 103.8198],
+                'Barcelona': [41.3851, 2.1734],
+                'Rome': [41.9028, 12.4964],
+                'Amsterdam': [52.3676, 4.9041]
+            };
+            return coords[cityName];
+        }
+
+        // Get airport coordinates by IATA code
+        function getAirportCoords(iataCode) {
+            const airports = {
+                // Major European airports
+                'MAD': [40.4983, -3.5676], // Madrid
+                'BCN': [41.2974, 2.0833],  // Barcelona
+                'AGP': [36.6749, -4.4991], // Málaga
+                'XRY': [36.7446, -6.0601], // Jerez
+                'SVQ': [37.4180, -5.8931], // Seville
+                'LHR': [51.4700, -0.4543], // London Heathrow
+                'CDG': [49.0097, 2.5479],  // Paris CDG
+                'AMS': [52.3105, 4.7683],  // Amsterdam
+                'FRA': [50.0379, 8.5622],  // Frankfurt
+                'MUC': [48.3537, 11.7750], // Munich
+                'FCO': [41.8003, 12.2389], // Rome
+                'VCE': [45.5053, 12.3519], // Venice
+                'MXP': [45.6301, 8.7231],  // Milan
+                'LIS': [38.7742, -9.1342], // Lisbon
+                'OPO': [41.2481, -8.6814], // Porto
+                'DUB': [53.4213, -6.2701], // Dublin
+                'BRU': [50.9010, 4.4856],  // Brussels
+                'VIE': [48.1103, 16.5697], // Vienna
+                'ZRH': [47.4582, 8.5554],  // Zurich
+                'CPH': [55.6180, 12.6508], // Copenhagen
+                'OSL': [60.1939, 11.1004], // Oslo
+                'ARN': [59.6519, 17.9186], // Stockholm
+                'ATH': [37.9364, 23.9445], // Athens
+                'IST': [41.2753, 28.7519], // Istanbul
+                // Other major airports
+                'JFK': [40.6413, -73.7781], // New York JFK
+                'LAX': [33.9416, -118.4085], // Los Angeles
+                'ORD': [41.9742, -87.9073], // Chicago
+                'DXB': [25.2532, 55.3657],  // Dubai
+                'SIN': [1.3644, 103.9915],  // Singapore
+                'HND': [35.5494, 139.7798], // Tokyo Haneda
+                'NRT': [35.7720, 140.3929], // Tokyo Narita
+                'SYD': [-33.9399, 151.1753], // Sydney
+                'HKG': [22.3080, 113.9185], // Hong Kong
+                'ICN': [37.4602, 126.4407]  // Seoul
+            };
+            return airports[iataCode.toUpperCase()] || null;
+        }
+
+        // ===================================
+        // EXISTING FUNCTIONS (UPDATED)
+        // ===================================
+
+        // Resolve user's nearest airport
+        async function resolveAirport() {
+            const cityInput = document.getElementById('cityInput');
+            const countryInput = document.getElementById('countryInput');
+            const resultDiv = document.getElementById('airportResult');
+            const codeEl = document.getElementById('airportCode');
+            const nameEl = document.getElementById('airportName');
+            const locationEl = document.getElementById('airportLocation');
+
+            const city = cityInput.value.trim();
+            const country = countryInput.value.trim();
+
+            if (!city || !country) {
+                alert('Please enter both city and country');
+                return;
+            }
+
+            // Hide previous result
+            resultDiv.classList.remove('show');
+
+            // Show loading state
+            cityInput.disabled = true;
+            countryInput.disabled = true;
+
+            try {
+                const response = await fetch(`${API_ENDPOINT}/resolve-airport`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ city, country })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+
+                // Display result
+                codeEl.textContent = data.airport_code;
+                nameEl.textContent = data.airport_name;
+                locationEl.textContent = `Nearest airport for ${data.city}, ${data.country}`;
+                resultDiv.classList.add('show');
+
+                // Store airport code, alternatives, and show recommendations section
+                userDepartureAirport = data.airport_code;
+                userAirportAlternatives = data.alternatives || [];
+                console.log('Stored alternatives:', userAirportAlternatives);
+                document.getElementById('recommendationsSection').classList.add('show');
+
+                // Clear all old markers and paths from map first
+                console.log('Clearing old map markers before adding new departure marker');
+                if (departureMarker) {
+                    map.removeLayer(departureMarker);
+                    departureMarker = null;
+                }
+                destinationMarkers.forEach(marker => map.removeLayer(marker));
+                flightPaths.forEach(path => map.removeLayer(path));
+                destinationMarkers = [];
+                flightPaths = [];
+
+                // Add departure marker to map using coordinates from API response
+                if (data.latitude && data.longitude) {
+                    addDepartureMarker(data.latitude, data.longitude, data.airport_code, data.airport_name, data.city, data.country);
+                } else {
+                    console.warn(`No coordinates returned for airport ${data.airport_code}`);
+                }
+
+            } catch (error) {
+                console.error('Error resolving airport:', error);
+                alert(`Error: ${error.message}`);
+            } finally {
+                cityInput.disabled = false;
+                countryInput.disabled = false;
+            }
+        }
+
+        // Get travel recommendations
+        async function getRecommendations() {
+            if (!userDepartureAirport) {
+                alert('Please find your nearest airport first!');
+                return;
+            }
+
+            const contentEl = document.getElementById('recommendationsContent');
+            const btn = document.getElementById('getRecommendationsBtn');
+
+            // Show loading
+            btn.disabled = true;
+            btn.textContent = 'Calculating... (10-15 seconds)';
+            contentEl.innerHTML = `
+                <div class="loading-spinner">
+                    <div class="spinner"></div>
+                    <p style="color: #666; margin-top: 16px;">
+                        Searching real-time flight prices for all 10 destinations in parallel...<br>
+                        This usually takes 10-15 seconds. Please wait!
+                    </p>
+                </div>
+            `;
+
+            try {
+                const response = await fetch(`${API_ENDPOINT}/travel-recommendations`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        departure_airport: userDepartureAirport,
+                        alternatives: userAirportAlternatives
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+
+                // Display recommendations
+                displayRecommendations(data.recommendations, data.weights);
+
+                // Add recommendation markers to map
+                addRecommendationMarkers(data.recommendations);
+
+            } catch (error) {
+                console.error('Error getting recommendations:', error);
+                contentEl.innerHTML = `
+                    <div style="background: #fee; padding: 20px; border-radius: 8px; color: #c33;">
+                        <strong>Error:</strong> ${error.message}
+                    </div>
+                `;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Get My Top 3 Recommendations';
+            }
+        }
+
+        // Display travel recommendations
+        function displayRecommendations(recommendations, weights) {
+            const contentEl = document.getElementById('recommendationsContent');
+
+            if (!recommendations || recommendations.length === 0) {
+                contentEl.innerHTML = '<p style="color: #666;">No recommendations found.</p>';
+                return;
+            }
+
+            let html = '<div style="margin-bottom: 16px; color: #666; font-size: 0.9rem;">';
+            html += `<strong>Scoring Weights:</strong> Weather ${weights.weather * 100}%, Quality of Life ${weights.qol * 100}%, Flight Price ${weights.flight * 100}%`;
+            html += '</div>';
+
+            recommendations.forEach((rec, index) => {
+                const rank = index + 1;
+                html += `
+                    <div class="recommendation-card">
+                        <div class="recommendation-rank">#${rank}</div>
+                        <div class="recommendation-header">
+                            <div>
+                                <div class="recommendation-city">${rec.city}</div>
+                                <div class="recommendation-country">${rec.country} (${rec.iata_code})</div>
+                            </div>
+                            <div class="recommendation-score">
+                                <div class="score-total">${rec.scores.total_score.toFixed(3)}</div>
+                                <div class="score-label">Total Score</div>
+                            </div>
+                        </div>
+
+                        <div class="score-breakdown">
+                            <div class="score-item">
+                                <div class="score-item-label">Weather Score</div>
+                                <div class="score-item-value">${rec.scores.weather_score.toFixed(3)}</div>
+                            </div>
+                            <div class="score-item">
+                                <div class="score-item-label">Quality of Life</div>
+                                <div class="score-item-value">${rec.scores.qol_score.toFixed(3)}</div>
+                            </div>
+                            <div class="score-item">
+                                <div class="score-item-label">Flight Price</div>
+                                <div class="score-item-value">${rec.scores.flight_score.toFixed(3)}</div>
+                            </div>
+                        </div>
+
+                        <div class="recommendation-details">
+                            <div class="detail-item">
+                                <div class="detail-value">${rec.details.avg_temperature}°C</div>
+                                <div class="detail-label">3-Day Avg Temp</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-value">${rec.details.flight_price ? '€' + rec.details.flight_price.toFixed(2) : 'N/A'}</div>
+                                <div class="detail-label">Round-Trip Price</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-value">${rec.details.quality_of_life.michelin_restaurants}</div>
+                                <div class="detail-label">Michelin Restaurants</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            contentEl.innerHTML = html;
+        }
+
+        // Fetch destinations from API
+        async function fetchDestinations() {
+            const statusEl = document.getElementById('status');
+            const fetchBtn = document.getElementById('fetchBtn');
+            const gridEl = document.getElementById('destinationsGrid');
+
+            // Update UI
+            statusEl.textContent = 'Loading destinations...';
+            statusEl.className = 'status loading';
+            fetchBtn.disabled = true;
+
+            try {
+                const response = await fetch(`${API_ENDPOINT}/weather`);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+
+                // Display results
+                displayDestinations(data);
+
+                // Update status
+                const successCount = data.results.filter(r => r.status === 'success').length;
+                const totalCount = data.results.length;
+
+                if (successCount === 0) {
+                    statusEl.textContent = `Loaded ${totalCount} destinations (Weather API keys not configured yet)`;
+                    statusEl.className = 'status';
+                } else {
+                    statusEl.textContent = `Successfully loaded ${successCount}/${totalCount} destinations with weather data`;
+                    statusEl.className = 'status success';
+                }
+
+            } catch (error) {
+                console.error('Error fetching destinations:', error);
+                statusEl.textContent = `Error: ${error.message}`;
+                statusEl.className = 'status error';
+                gridEl.innerHTML = '<p style="color: white; text-align: center;">Failed to load destinations. Check console for details.</p>';
+            } finally {
+                fetchBtn.disabled = false;
+            }
+        }
+
+        // Display destinations in grid
+        function displayDestinations(data) {
+            const gridEl = document.getElementById('destinationsGrid');
+            gridEl.innerHTML = '';
+
+            if (!data.results || data.results.length === 0) {
+                gridEl.innerHTML = '<p style="color: white; text-align: center;">No destinations found</p>';
+                return;
+            }
+
+            // Sort by city name
+            const sortedResults = data.results.sort((a, b) => a.city.localeCompare(b.city));
+
+            sortedResults.forEach(result => {
+                const card = createDestinationCard(result);
+                gridEl.appendChild(card);
+            });
+        }
+
+        // Create destination card element
+        function createDestinationCard(destination) {
+            const card = document.createElement('div');
+            card.className = 'destination-card';
+
+            // Note: Since we're getting results from Lambda, we need to fetch full destination data
+            // For now, we'll use the hardcoded data structure
+            const destinationData = getDestinationData(destination.city);
+
+            card.innerHTML = `
+                <div class="card-header">
+                    <div>
+                        <div class="city-name">${destination.city}</div>
+                        <div class="country">${destinationData.country}</div>
+                    </div>
+                    <div class="iata-code">${destinationData.iata_code}</div>
+                </div>
+
+                ${destination.status === 'success' && destination.weather ? `
+                    <div class="weather-section">
+                        <div class="weather-info">
+                            <div class="temperature">${Math.round(destination.weather.avg_temperature)}°C</div>
+                            <div class="weather-description">${destination.weather.description}</div>
+                        </div>
+                        <div class="weather-details">
+                            <div>3-Day Average</div>
+                            <div>Min: ${Math.round(destination.weather.min_temperature)}°C / Max: ${Math.round(destination.weather.max_temperature)}°C</div>
+                        </div>
+                    </div>
+                ` : `
+                    <div class="weather-section">
+                        <div class="no-weather">Weather data unavailable (API key needed)</div>
+                    </div>
+                `}
+
+                <div class="qol-section">
+                    <div class="qol-title">Quality of Life Metrics</div>
+                    <div class="qol-grid">
+                        <div class="qol-item">
+                            <span>Beer Price</span>
+                            <span class="qol-value">€${destinationData.qol.beer_price_eur}</span>
+                        </div>
+                        <div class="qol-item">
+                            <span>Michelin Restaurants</span>
+                            <span class="qol-value">${destinationData.qol.michelin_restaurants}</span>
+                        </div>
+                        <div class="qol-item">
+                            <span>Food Quality</span>
+                            <span class="qol-value">${destinationData.qol.food_quality_score}/10</span>
+                        </div>
+                        <div class="qol-item">
+                            <span>Walkability</span>
+                            <span class="qol-value">${destinationData.qol.walkability_score}/10</span>
+                        </div>
+                        <div class="qol-item">
+                            <span>Public Transport</span>
+                            <span class="qol-value">${destinationData.qol.public_transport_score}/10</span>
+                        </div>
+                        <div class="qol-item">
+                            <span>Safety</span>
+                            <span class="qol-value">${destinationData.qol.safety_score}/10</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            return card;
+        }
+
+        // Hardcoded destination data (matches the S3 data)
+        function getDestinationData(cityName) {
+            const destinations = {
+                'London': {
+                    country: 'United Kingdom',
+                    iata_code: 'LHR',
+                    qol: { beer_price_eur: 6.5, michelin_restaurants: 67, food_quality_score: 8.7, walkability_score: 8.2, public_transport_score: 9.1, safety_score: 7.8 }
+                },
+                'Paris': {
+                    country: 'France',
+                    iata_code: 'CDG',
+                    qol: { beer_price_eur: 7.0, michelin_restaurants: 119, food_quality_score: 9.5, walkability_score: 8.8, public_transport_score: 9.0, safety_score: 7.2 }
+                },
+                'New York City': {
+                    country: 'USA',
+                    iata_code: 'JFK',
+                    qol: { beer_price_eur: 8.0, michelin_restaurants: 76, food_quality_score: 9.2, walkability_score: 8.5, public_transport_score: 8.7, safety_score: 7.0 }
+                },
+                'Tokyo': {
+                    country: 'Japan',
+                    iata_code: 'HND',
+                    qol: { beer_price_eur: 5.5, michelin_restaurants: 226, food_quality_score: 9.8, walkability_score: 9.0, public_transport_score: 9.8, safety_score: 9.5 }
+                },
+                'Sydney': {
+                    country: 'Australia',
+                    iata_code: 'SYD',
+                    qol: { beer_price_eur: 9.0, michelin_restaurants: 22, food_quality_score: 8.5, walkability_score: 7.8, public_transport_score: 8.0, safety_score: 8.8 }
+                },
+                'Dubai': {
+                    country: 'UAE',
+                    iata_code: 'DXB',
+                    qol: { beer_price_eur: 12.0, michelin_restaurants: 11, food_quality_score: 8.0, walkability_score: 6.5, public_transport_score: 7.5, safety_score: 9.0 }
+                },
+                'Singapore': {
+                    country: 'Singapore',
+                    iata_code: 'SIN',
+                    qol: { beer_price_eur: 10.0, michelin_restaurants: 49, food_quality_score: 9.3, walkability_score: 8.7, public_transport_score: 9.5, safety_score: 9.7 }
+                },
+                'Barcelona': {
+                    country: 'Spain',
+                    iata_code: 'BCN',
+                    qol: { beer_price_eur: 4.5, michelin_restaurants: 31, food_quality_score: 9.0, walkability_score: 9.2, public_transport_score: 8.5, safety_score: 7.5 }
+                },
+                'Rome': {
+                    country: 'Italy',
+                    iata_code: 'FCO',
+                    qol: { beer_price_eur: 5.0, michelin_restaurants: 22, food_quality_score: 9.4, walkability_score: 8.0, public_transport_score: 7.0, safety_score: 7.3 }
+                },
+                'Amsterdam': {
+                    country: 'Netherlands',
+                    iata_code: 'AMS',
+                    qol: { beer_price_eur: 5.5, michelin_restaurants: 19, food_quality_score: 8.3, walkability_score: 9.5, public_transport_score: 8.8, safety_score: 8.5 }
+                }
+            };
+
+            return destinations[cityName] || {
+                country: 'Unknown',
+                iata_code: 'N/A',
+                qol: { beer_price_eur: 0, michelin_restaurants: 0, food_quality_score: 0, walkability_score: 0, public_transport_score: 0, safety_score: 0 }
+            };
+        }
+
+        // Auto-load on page load
+        window.addEventListener('load', () => {
+            fetchDestinations();
+        });
+    </script>
+</body>
+</html>

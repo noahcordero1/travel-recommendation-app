@@ -1,0 +1,12 @@
+# Terraform Variables Configuration
+# Copy this file to terraform.tfvars and update with your values
+
+aws_region  = "eu-west-1"  # Ireland (close to Spain)
+environment = "dev"
+project_name = "travel-help"
+
+# API Keys - Update these after getting your keys
+# These are just placeholders and will be stored in AWS Secrets Manager
+openweather_api_key = "your-openweathermap-api-key-here"
+huggingface_api_key = "your-huggingface-api-key-here"
+flight_api_key      = "your-flight-api-key-here"

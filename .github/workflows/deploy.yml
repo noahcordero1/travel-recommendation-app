@@ -1,0 +1,123 @@
+name: Deploy to AWS
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  AWS_REGION: eu-west-1
+  S3_FRONTEND_BUCKET: travel-help-frontend-515214870577
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install boto3 requests
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Package Lambda functions
+        run: |
+          chmod +x package_lambda.sh
+          ./package_lambda.sh
+
+      - name: Deploy Lambda functions
+        run: |
+          # Update weather_fetcher Lambda
+          aws lambda update-function-code \
+            --function-name travel-help-weather-fetcher-dev \
+            --zip-file fileb://lambda_code/weather_fetcher.zip \
+            --region ${{ env.AWS_REGION }}
+
+          # Update airport_resolver Lambda
+          aws lambda update-function-code \
+            --function-name travel-help-airport-resolver-dev \
+            --zip-file fileb://lambda_code/airport_resolver.zip \
+            --region ${{ env.AWS_REGION }}
+
+          # Update flight_pricer Lambda
+          aws lambda update-function-code \
+            --function-name travel-help-flight-pricer-dev \
+            --zip-file fileb://lambda_code/flight_pricer.zip \
+            --region ${{ env.AWS_REGION }}
+
+          # Update index_calculator Lambda
+          aws lambda update-function-code \
+            --function-name travel-help-index-calculator-dev \
+            --zip-file fileb://lambda_code/index_calculator.zip \
+            --region ${{ env.AWS_REGION }}
+
+          echo "Lambda functions updated successfully"
+
+      - name: Deploy frontend to S3
+        run: |
+          # Upload frontend files with cache-control
+          aws s3 cp frontend/index.html s3://${{ env.S3_FRONTEND_BUCKET }}/ \
+            --cache-control "no-cache, no-store, must-revalidate" \
+            --content-type "text/html"
+
+          # Upload any other frontend assets if they exist
+          if [ -d "frontend/css" ]; then
+            aws s3 sync frontend/css s3://${{ env.S3_FRONTEND_BUCKET }}/css/ \
+              --cache-control "max-age=86400"
+          fi
+
+          if [ -d "frontend/js" ]; then
+            aws s3 sync frontend/js s3://${{ env.S3_FRONTEND_BUCKET }}/js/ \
+              --cache-control "max-age=86400"
+          fi
+
+          if [ -d "frontend/images" ]; then
+            aws s3 sync frontend/images s3://${{ env.S3_FRONTEND_BUCKET }}/images/ \
+              --cache-control "max-age=86400"
+          fi
+
+          echo "Frontend deployed to S3"
+
+      - name: Invalidate CloudFront cache (if applicable)
+        continue-on-error: true
+        run: |
+          # Get CloudFront distribution ID if it exists
+          DISTRIBUTION_ID=$(aws cloudfront list-distributions \
+            --query "DistributionList.Items[?Origins.Items[?DomainName=='${{ env.S3_FRONTEND_BUCKET }}.s3.amazonaws.com']].Id | [0]" \
+            --output text 2>/dev/null || echo "")
+
+          if [ ! -z "$DISTRIBUTION_ID" ] && [ "$DISTRIBUTION_ID" != "None" ]; then
+            echo "Invalidating CloudFront distribution: $DISTRIBUTION_ID"
+            aws cloudfront create-invalidation \
+              --distribution-id $DISTRIBUTION_ID \
+              --paths "/*"
+          else
+            echo "No CloudFront distribution found, skipping invalidation"
+          fi
+
+      - name: Deployment summary
+        run: |
+          echo "✅ Deployment completed successfully!"
+          echo ""
+          echo "📦 Lambda functions updated:"
+          echo "  - travel-help-weather-fetcher-dev"
+          echo "  - travel-help-airport-resolver-dev"
+          echo "  - travel-help-flight-pricer-dev"
+          echo "  - travel-help-index-calculator-dev"
+          echo ""
+          echo "🌐 Frontend deployed to:"
+          echo "  http://${{ env.S3_FRONTEND_BUCKET }}.s3-website-${{ env.AWS_REGION }}.amazonaws.com/"

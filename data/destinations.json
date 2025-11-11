@@ -1,0 +1,184 @@
+{
+  "destinations": [
+    {
+      "city_id": "london-uk",
+      "city": "London",
+      "country": "United Kingdom",
+      "iata_code": "LHR",
+      "coordinates": {
+        "lat": 51.5074,
+        "lon": -0.1278
+      },
+      "quality_of_life": {
+        "beer_price_eur": 6.5,
+        "michelin_restaurants": 67,
+        "food_quality_score": 8.7,
+        "walkability_score": 8.2,
+        "public_transport_score": 9.1,
+        "safety_score": 7.8
+      }
+    },
+    {
+      "city_id": "paris-fr",
+      "city": "Paris",
+      "country": "France",
+      "iata_code": "CDG",
+      "coordinates": {
+        "lat": 48.8566,
+        "lon": 2.3522
+      },
+      "quality_of_life": {
+        "beer_price_eur": 7.0,
+        "michelin_restaurants": 119,
+        "food_quality_score": 9.5,
+        "walkability_score": 8.8,
+        "public_transport_score": 9.0,
+        "safety_score": 7.2
+      }
+    },
+    {
+      "city_id": "newyork-us",
+      "city": "New York City",
+      "country": "USA",
+      "iata_code": "JFK",
+      "coordinates": {
+        "lat": 40.7128,
+        "lon": -74.0060
+      },
+      "quality_of_life": {
+        "beer_price_eur": 8.0,
+        "michelin_restaurants": 76,
+        "food_quality_score": 9.2,
+        "walkability_score": 8.5,
+        "public_transport_score": 8.7,
+        "safety_score": 7.0
+      }
+    },
+    {
+      "city_id": "tokyo-jp",
+      "city": "Tokyo",
+      "country": "Japan",
+      "iata_code": "HND",
+      "coordinates": {
+        "lat": 35.6762,
+        "lon": 139.6503
+      },
+      "quality_of_life": {
+        "beer_price_eur": 5.5,
+        "michelin_restaurants": 226,
+        "food_quality_score": 9.8,
+        "walkability_score": 9.0,
+        "public_transport_score": 9.8,
+        "safety_score": 9.5
+      }
+    },
+    {
+      "city_id": "sydney-au",
+      "city": "Sydney",
+      "country": "Australia",
+      "iata_code": "SYD",
+      "coordinates": {
+        "lat": -33.8688,
+        "lon": 151.2093
+      },
+      "quality_of_life": {
+        "beer_price_eur": 9.0,
+        "michelin_restaurants": 22,
+        "food_quality_score": 8.5,
+        "walkability_score": 7.8,
+        "public_transport_score": 8.0,
+        "safety_score": 8.8
+      }
+    },
+    {
+      "city_id": "dubai-ae",
+      "city": "Dubai",
+      "country": "UAE",
+      "iata_code": "DXB",
+      "coordinates": {
+        "lat": 25.2048,
+        "lon": 55.2708
+      },
+      "quality_of_life": {
+        "beer_price_eur": 12.0,
+        "michelin_restaurants": 11,
+        "food_quality_score": 8.0,
+        "walkability_score": 6.5,
+        "public_transport_score": 7.5,
+        "safety_score": 9.0
+      }
+    },
+    {
+      "city_id": "singapore-sg",
+      "city": "Singapore",
+      "country": "Singapore",
+      "iata_code": "SIN",
+      "coordinates": {
+        "lat": 1.3521,
+        "lon": 103.8198
+      },
+      "quality_of_life": {
+        "beer_price_eur": 10.0,
+        "michelin_restaurants": 49,
+        "food_quality_score": 9.3,
+        "walkability_score": 8.7,
+        "public_transport_score": 9.5,
+        "safety_score": 9.7
+      }
+    },
+    {
+      "city_id": "barcelona-es",
+      "city": "Barcelona",
+      "country": "Spain",
+      "iata_code": "BCN",
+      "coordinates": {
+        "lat": 41.3851,
+        "lon": 2.1734
+      },
+      "quality_of_life": {
+        "beer_price_eur": 4.5,
+        "michelin_restaurants": 31,
+        "food_quality_score": 9.0,
+        "walkability_score": 9.2,
+        "public_transport_score": 8.5,
+        "safety_score": 7.5
+      }
+    },
+    {
+      "city_id": "rome-it",
+      "city": "Rome",
+      "country": "Italy",
+      "iata_code": "FCO",
+      "coordinates": {
+        "lat": 41.9028,
+        "lon": 12.4964
+      },
+      "quality_of_life": {
+        "beer_price_eur": 5.0,
+        "michelin_restaurants": 22,
+        "food_quality_score": 9.4,
+        "walkability_score": 8.0,
+        "public_transport_score": 7.0,
+        "safety_score": 7.3
+      }
+    },
+    {
+      "city_id": "amsterdam-nl",
+      "city": "Amsterdam",
+      "country": "Netherlands",
+      "iata_code": "AMS",
+      "coordinates": {
+        "lat": 52.3676,
+        "lon": 4.9041
+      },
+      "quality_of_life": {
+        "beer_price_eur": 5.5,
+        "michelin_restaurants": 19,
+        "food_quality_score": 8.3,
+        "walkability_score": 9.5,
+        "public_transport_score": 8.8,
+        "safety_score": 8.5
+      }
+    }
+  ]
+}
