@@ -8,6 +8,7 @@ on:
 env:
   AWS_REGION: eu-west-1
   S3_FRONTEND_BUCKET: travel-help-frontend-515214870577
+  S3_DATA_BUCKET: travel-help-data-dev-515214870577
 
 jobs:
   deploy:
@@ -69,11 +70,11 @@ jobs:
 
       - name: Upload destinations data to S3
         run: |
-          # Upload destinations.json to S3 for Lambda to read
-          aws s3 cp data/destinations.json s3://${{ env.S3_FRONTEND_BUCKET }}/static-data/destinations.json \
+          # Upload destinations.json to S3 DATA bucket for Lambda to read
+          aws s3 cp data/destinations.json s3://${{ env.S3_DATA_BUCKET }}/static-data/destinations.json \
             --content-type "application/json"
 
-          echo "Destinations data uploaded to S3"
+          echo "Destinations data uploaded to S3 data bucket"
 
       - name: Trigger weather fetcher to populate DynamoDB
         run: |
