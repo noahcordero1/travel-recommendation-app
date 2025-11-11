@@ -24,67 +24,80 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #f8f9fa;
             min-height: 100vh;
-            padding: 20px;
-            color: #333;
+            color: #1a202c;
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
+            padding: 0 24px;
         }
 
         header {
-            text-align: center;
-            color: white;
-            margin-bottom: 40px;
+            background: white;
+            padding: 24px 0;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            margin-bottom: 48px;
+        }
+
+        header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         h1 {
             font-size: 2.5rem;
-            margin-bottom: 10px;
-            font-weight: 700;
+            margin-bottom: 12px;
+            font-weight: 800;
+            color: #1a202c;
+            line-height: 1.2;
         }
 
         .subtitle {
             font-size: 1.1rem;
-            opacity: 0.9;
+            color: #718096;
+            line-height: 1.6;
+            font-weight: 400;
         }
 
         .controls {
             background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            margin-bottom: 30px;
+            padding: 24px;
+            border-radius: 16px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+            margin-bottom: 48px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            gap: 15px;
+            gap: 20px;
         }
 
         button {
-            background: #667eea;
+            background: #1a202c;
             color: white;
             border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
+            padding: 14px 32px;
+            border-radius: 12px;
             font-size: 1rem;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
             font-weight: 600;
+            letter-spacing: 0.01em;
         }
 
         button:hover {
-            background: #5568d3;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            background: #2d3748;
+            transform: translateY(-1px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
         }
 
         button:disabled {
-            background: #ccc;
+            background: #cbd5e0;
             cursor: not-allowed;
             transform: none;
         }
@@ -95,7 +108,7 @@
         }
 
         .status.loading {
-            color: #667eea;
+            color: #4299e1;
             font-weight: 600;
         }
 
@@ -118,15 +131,17 @@
 
         .destination-card {
             background: white;
-            border-radius: 12px;
-            padding: 24px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s ease;
         }
 
         .destination-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+            border-color: #cbd5e0;
         }
 
         .card-header {
@@ -149,7 +164,7 @@
         }
 
         .iata-code {
-            background: #667eea;
+            background: #1a202c;
             color: white;
             padding: 4px 12px;
             border-radius: 6px;
@@ -174,7 +189,7 @@
         .temperature {
             font-size: 2rem;
             font-weight: 700;
-            color: #667eea;
+            color: #4299e1;
         }
 
         .weather-description {
@@ -235,13 +250,15 @@
         }
 
         .api-info {
-            background: rgba(255, 255, 255, 0.95);
+            background: white;
             padding: 16px;
             border-radius: 12px;
             margin-bottom: 20px;
             font-size: 0.9rem;
             color: #4a5568;
-            border-left: 4px solid #667eea;
+            border-left: 4px solid #4299e1;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
         }
 
         .api-endpoint {
@@ -256,16 +273,18 @@
 
         .airport-resolver {
             background: white;
-            padding: 24px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            margin-bottom: 30px;
+            padding: 48px;
+            border-radius: 16px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+            margin-bottom: 48px;
         }
 
         .airport-resolver h2 {
-            font-size: 1.5rem;
+            font-size: 2rem;
             margin-bottom: 16px;
-            color: #2d3748;
+            color: #1a202c;
+            font-weight: 700;
         }
 
         .input-group {
@@ -285,7 +304,7 @@
 
         .input-group input:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #4299e1;
         }
 
         .airport-result {
@@ -303,7 +322,7 @@
         .airport-code {
             font-size: 2rem;
             font-weight: 700;
-            color: #667eea;
+            color: #1a202c;
             margin-bottom: 8px;
         }
 
@@ -320,10 +339,11 @@
 
         .recommendations-section {
             background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            margin-bottom: 30px;
+            padding: 48px;
+            border-radius: 16px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+            margin-bottom: 48px;
             display: none;
         }
 
@@ -332,45 +352,115 @@
         }
 
         .recommendations-section h2 {
-            color: #2d3748;
-            margin-bottom: 10px;
+            color: #1a202c;
+            margin-bottom: 16px;
+            font-size: 2rem;
+            font-weight: 700;
         }
 
         .recommendations-note {
-            background: #fff3cd;
+            background: #fff9e6;
             border-left: 4px solid #ffc107;
-            padding: 12px;
-            margin: 15px 0;
+            padding: 16px;
+            margin: 20px 0;
             font-size: 0.9rem;
             color: #856404;
-            border-radius: 4px;
+            border-radius: 8px;
+        }
+
+        .weight-controls {
+            background: #f8f9fa;
+            padding: 24px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .weight-controls h3 {
+            margin-bottom: 12px;
+            font-size: 1.2rem;
+            color: #1a202c;
+            font-weight: 700;
+        }
+
+        .weight-controls input[type="range"] {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #e2e8f0;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .weight-controls input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #1a202c;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .weight-controls input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 0 0 0 8px rgba(26, 32, 44, 0.1);
+        }
+
+        .weight-controls input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #1a202c;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+        }
+
+        .weight-controls input[type="range"]::-moz-range-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 0 0 0 8px rgba(26, 32, 44, 0.1);
+        }
+
+        #getRecommendationsBtn {
+            margin-bottom: 32px;
+            margin-top: 8px;
         }
 
         .recommendation-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 24px;
-            border-radius: 12px;
-            margin: 20px 0;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            background: white;
+            color: #1a202c;
+            padding: 32px;
+            border-radius: 16px;
+            margin: 24px 0;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            border: 2px solid #e2e8f0;
             position: relative;
+            transition: all 0.2s ease;
+        }
+
+        .recommendation-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+            border-color: #cbd5e0;
         }
 
         .recommendation-rank {
             position: absolute;
-            top: -10px;
-            right: 20px;
-            background: #ffc107;
-            color: #333;
-            width: 40px;
-            height: 40px;
+            top: -12px;
+            right: 24px;
+            background: #1a202c;
+            color: white;
+            width: 48px;
+            height: 48px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 700;
-            font-size: 1.2rem;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            font-size: 1.3rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
 
         .recommendation-header {
@@ -381,14 +471,15 @@
         }
 
         .recommendation-city {
-            font-size: 1.8rem;
+            font-size: 2rem;
             font-weight: 700;
             margin-bottom: 4px;
+            color: #1a202c;
         }
 
         .recommendation-country {
             font-size: 1rem;
-            opacity: 0.9;
+            color: #718096;
         }
 
         .recommendation-score {
@@ -396,23 +487,27 @@
         }
 
         .score-total {
-            font-size: 2rem;
+            font-size: 2.5rem;
             font-weight: 700;
+            color: #1a202c;
         }
 
         .score-label {
             font-size: 0.85rem;
-            opacity: 0.9;
+            color: #718096;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
 
         .score-breakdown {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 12px;
-            margin: 16px 0;
-            padding: 16px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
+            gap: 16px;
+            margin: 24px 0;
+            padding: 24px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
         }
 
         .score-item {
@@ -420,22 +515,26 @@
         }
 
         .score-item-label {
-            font-size: 0.85rem;
-            opacity: 0.9;
-            margin-bottom: 4px;
+            font-size: 0.8rem;
+            color: #718096;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
         }
 
         .score-item-value {
-            font-size: 1.3rem;
-            font-weight: 600;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1a202c;
         }
 
         .recommendation-details {
             display: flex;
             justify-content: space-around;
-            margin-top: 16px;
-            padding-top: 16px;
-            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 2px solid #e2e8f0;
         }
 
         .detail-item {
@@ -443,14 +542,18 @@
         }
 
         .detail-value {
-            font-size: 1.4rem;
+            font-size: 1.6rem;
             font-weight: 700;
-            margin-bottom: 4px;
+            margin-bottom: 6px;
+            color: #1a202c;
         }
 
         .detail-label {
-            font-size: 0.85rem;
-            opacity: 0.9;
+            font-size: 0.8rem;
+            color: #718096;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
         }
 
         .loading-spinner {
@@ -459,8 +562,8 @@
         }
 
         .spinner {
-            border: 4px solid rgba(102, 126, 234, 0.2);
-            border-left-color: #667eea;
+            border: 4px solid rgba(66, 153, 225, 0.2);
+            border-left-color: #4299e1;
             border-radius: 50%;
             width: 40px;
             height: 40px;
@@ -474,15 +577,18 @@
 
         .map-container {
             background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            margin-bottom: 30px;
+            padding: 32px;
+            border-radius: 16px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+            margin-bottom: 48px;
         }
 
         .map-container h2 {
-            color: #2d3748;
-            margin-bottom: 15px;
+            color: #1a202c;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            font-weight: 700;
         }
 
         #map {
@@ -520,13 +626,14 @@
         }
 
         .map-popup-score {
-            background: #667eea;
+            background: #1a202c;
             color: white;
-            padding: 4px 12px;
-            border-radius: 4px;
+            padding: 6px 14px;
+            border-radius: 6px;
             display: inline-block;
             margin-top: 8px;
             font-weight: 600;
+            font-size: 0.9rem;
         }
 
         @media (max-width: 768px) {
@@ -554,8 +661,10 @@
 <body>
     <div class="container">
         <header>
-            <h1>Travel Help</h1>
-            <p class="subtitle">Intelligent Cloud-Based Travel Recommendations</p>
+            <div>
+                <h1>Travel Help</h1>
+                <p class="subtitle">Intelligent travel recommendations powered by cloud computing</p>
+            </div>
         </header>
 
         <div class="map-container">
@@ -591,43 +700,40 @@
             </div>
 
             <!-- Weight Adjustment Controls -->
-            <div class="weight-controls" style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-                <h3 style="margin-bottom: 15px; font-size: 1.1rem;">Customize Your Preferences</h3>
-                <p style="color: #666; font-size: 0.9rem; margin-bottom: 15px;">Adjust the importance of each factor (must total 100%)</p>
+            <div class="weight-controls">
+                <h3>Customize Your Preferences</h3>
+                <p style="color: #718096; font-size: 0.9rem; margin-bottom: 20px;">Adjust the importance of each factor (must total 100%)</p>
 
-                <div style="margin-bottom: 15px;">
-                    <label style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                <div style="margin-bottom: 20px;">
+                    <label style="display: flex; justify-content: space-between; margin-bottom: 8px; color: #2d3748; font-weight: 600;">
                         <span>🌤️ Weather</span>
-                        <strong id="weatherWeightValue">30%</strong>
+                        <strong id="weatherWeightValue" style="color: #1a202c;">30%</strong>
                     </label>
-                    <input type="range" id="weatherWeight" min="0" max="100" value="30" step="5"
-                           style="width: 100%;" oninput="updateWeights('weather')">
+                    <input type="range" id="weatherWeight" min="0" max="100" value="30" step="5" oninput="updateWeights('weather')">
                 </div>
 
-                <div style="margin-bottom: 15px;">
-                    <label style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                <div style="margin-bottom: 20px;">
+                    <label style="display: flex; justify-content: space-between; margin-bottom: 8px; color: #2d3748; font-weight: 600;">
                         <span>🏙️ Quality of Life</span>
-                        <strong id="qolWeightValue">30%</strong>
+                        <strong id="qolWeightValue" style="color: #1a202c;">30%</strong>
                     </label>
-                    <input type="range" id="qolWeight" min="0" max="100" value="30" step="5"
-                           style="width: 100%;" oninput="updateWeights('qol')">
+                    <input type="range" id="qolWeight" min="0" max="100" value="30" step="5" oninput="updateWeights('qol')">
                 </div>
 
-                <div style="margin-bottom: 10px;">
-                    <label style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                <div style="margin-bottom: 12px;">
+                    <label style="display: flex; justify-content: space-between; margin-bottom: 8px; color: #2d3748; font-weight: 600;">
                         <span>✈️ Flight Price</span>
-                        <strong id="flightWeightValue">40%</strong>
+                        <strong id="flightWeightValue" style="color: #1a202c;">40%</strong>
                     </label>
-                    <input type="range" id="flightWeight" min="0" max="100" value="40" step="5"
-                           style="width: 100%;" oninput="updateWeights('flight')">
+                    <input type="range" id="flightWeight" min="0" max="100" value="40" step="5" oninput="updateWeights('flight')">
                 </div>
 
-                <div id="weightWarning" style="color: #dc3545; font-size: 0.9rem; display: none; margin-top: 10px;">
+                <div id="weightWarning" style="color: #e53e3e; font-size: 0.9rem; display: none; margin-top: 16px; font-weight: 600;">
                     ⚠️ Weights must total 100%
                 </div>
             </div>
 
-            <button id="getRecommendationsBtn" onclick="getRecommendations()" style="margin-bottom: 20px;">
+            <button id="getRecommendationsBtn" onclick="getRecommendations()">
                 Get My Top 3 Recommendations
             </button>
 
