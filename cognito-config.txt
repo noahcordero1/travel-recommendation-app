@@ -1,0 +1,3 @@
+Cognito User Pool ID: eu-west-1_JDNMSCjtq
+Cognito Client ID: 205m5hblf42kkgtfqii42nm6jj
+Region: eu-west-1

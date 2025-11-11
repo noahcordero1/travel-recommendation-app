@@ -57,3 +57,18 @@ output "index_calculator_function_name" {
   description = "Index calculator Lambda function name"
   value       = aws_lambda_function.index_calculator.function_name
 }
+
+output "cognito_user_pool_id" {
+  description = "Cognito User Pool ID"
+  value       = aws_cognito_user_pool.main.id
+}
+
+output "cognito_user_pool_client_id" {
+  description = "Cognito User Pool Client ID"
+  value       = aws_cognito_user_pool_client.main.id
+}
+
+output "cognito_region" {
+  description = "AWS region for Cognito"
+  value       = var.aws_region
+}

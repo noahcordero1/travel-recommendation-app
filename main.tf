@@ -374,9 +374,11 @@ resource "aws_apigatewayv2_integration" "airport_resolver" {
 }
 
 resource "aws_apigatewayv2_route" "airport_resolver" {
-  api_id    = aws_apigatewayv2_api.main.id
-  route_key = "POST /resolve-airport"
-  target    = "integrations/${aws_apigatewayv2_integration.airport_resolver.id}"
+  api_id             = aws_apigatewayv2_api.main.id
+  route_key          = "POST /resolve-airport"
+  target             = "integrations/${aws_apigatewayv2_integration.airport_resolver.id}"
+  authorization_type = "JWT"
+  authorizer_id      = aws_apigatewayv2_authorizer.cognito.id
 }
 
 resource "aws_lambda_permission" "api_gateway_airport_resolver" {
@@ -484,9 +486,11 @@ resource "aws_apigatewayv2_integration" "index_calculator" {
 }
 
 resource "aws_apigatewayv2_route" "index_calculator" {
-  api_id    = aws_apigatewayv2_api.main.id
-  route_key = "POST /travel-recommendations"
-  target    = "integrations/${aws_apigatewayv2_integration.index_calculator.id}"
+  api_id             = aws_apigatewayv2_api.main.id
+  route_key          = "POST /travel-recommendations"
+  target             = "integrations/${aws_apigatewayv2_integration.index_calculator.id}"
+  authorization_type = "JWT"
+  authorizer_id      = aws_apigatewayv2_authorizer.cognito.id
 }
 
 resource "aws_lambda_permission" "api_gateway_index_calculator" {
@@ -516,6 +520,92 @@ resource "aws_iam_role_policy" "lambda_invoke_permissions" {
       }
     ]
   })
+}
+
+# ===================================
+# Cognito User Pool
+# ===================================
+resource "aws_cognito_user_pool" "main" {
+  name = "${var.project_name}-users-${var.environment}"
+
+  # Email as username
+  username_attributes      = ["email"]
+  auto_verified_attributes = ["email"]
+
+  # Password policy
+  password_policy {
+    minimum_length    = 8
+    require_lowercase = true
+    require_uppercase = true
+    require_numbers   = true
+    require_symbols   = false
+  }
+
+  # Email configuration
+  email_configuration {
+    email_sending_account = "COGNITO_DEFAULT"
+  }
+
+  # Verification message template
+  verification_message_template {
+    default_email_option = "CONFIRM_WITH_CODE"
+    email_subject        = "Travel Help - Verify your email"
+    email_message        = "Thank you for signing up! Your verification code is {####}"
+  }
+
+  # Account recovery
+  account_recovery_setting {
+    recovery_mechanism {
+      name     = "verified_email"
+      priority = 1
+    }
+  }
+
+  tags = {
+    Name = "${var.project_name}-user-pool"
+  }
+}
+
+# Cognito User Pool Client (for frontend)
+resource "aws_cognito_user_pool_client" "main" {
+  name         = "${var.project_name}-web-client-${var.environment}"
+  user_pool_id = aws_cognito_user_pool.main.id
+
+  # OAuth flows
+  explicit_auth_flows = [
+    "ALLOW_USER_SRP_AUTH",
+    "ALLOW_REFRESH_TOKEN_AUTH"
+  ]
+
+  # Token validity
+  id_token_validity      = 60  # 60 minutes
+  access_token_validity  = 60  # 60 minutes
+  refresh_token_validity = 30  # 30 days
+
+  token_validity_units {
+    id_token      = "minutes"
+    access_token  = "minutes"
+    refresh_token = "days"
+  }
+
+  # Prevent secret generation (for public web clients)
+  generate_secret = false
+
+  # Allowed OAuth flows
+  allowed_oauth_flows_user_pool_client = false
+}
+
+# Cognito Authorizer for API Gateway
+resource "aws_apigatewayv2_authorizer" "cognito" {
+  api_id           = aws_apigatewayv2_api.main.id
+  authorizer_type  = "JWT"
+  identity_sources = ["$request.header.Authorization"]
+  name             = "${var.project_name}-cognito-authorizer"
+
+  jwt_configuration {
+    audience = [aws_cognito_user_pool_client.main.id]
+    issuer   = "https://cognito-idp.${var.aws_region}.amazonaws.com/${aws_cognito_user_pool.main.id}"
+  }
 }
 
 # ===================================
