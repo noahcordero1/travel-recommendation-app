@@ -1029,7 +1029,6 @@
             }
         }
 
-        // Weight management functions
         function getCurrentWeights() {
             const weatherWeight = parseInt(document.getElementById('weatherWeight').value) / 100;
             const qolWeight = parseInt(document.getElementById('qolWeight').value) / 100;
@@ -1052,7 +1051,6 @@
             const flightValue = document.getElementById('flightWeightValue');
             const warning = document.getElementById('weightWarning');
 
-            // Update the display for the changed slider
             const weather = parseInt(weatherSlider.value);
             const qol = parseInt(qolSlider.value);
             const flight = parseInt(flightSlider.value);
@@ -1061,7 +1059,6 @@
             qolValue.textContent = `${qol}%`;
             flightValue.textContent = `${flight}%`;
 
-            // Check if weights sum to 100%
             const total = weather + qol + flight;
 
             if (total !== 100) {
@@ -1079,7 +1076,6 @@
                 return;
             }
 
-            // Validate weights sum to 100%
             const weatherPct = parseInt(document.getElementById('weatherWeight').value);
             const qolPct = parseInt(document.getElementById('qolWeight').value);
             const flightPct = parseInt(document.getElementById('flightWeight').value);
@@ -1120,7 +1116,6 @@
 
                 console.log('Sending request to travel-recommendations with token:', token.substring(0, 20) + '...');
 
-                // Get current weights from sliders (convert from percentage to decimal)
                 const weights = getCurrentWeights();
 
                 const response = await fetch(`${API_ENDPOINT}/travel-recommendations`, {

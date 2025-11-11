@@ -9,12 +9,10 @@ lambda_client = boto3.client('lambda')
 DESTINATIONS_TABLE = os.environ['DESTINATIONS_TABLE']
 FLIGHT_PRICER_FUNCTION = os.environ['FLIGHT_PRICER_FUNCTION']
 
-# Scoring weights
 WEATHER_WEIGHT = 0.30
 QOL_WEIGHT = 0.30
 FLIGHT_WEIGHT = 0.40
 
-# QoL metric weights (sum to 1.0)
 QOL_WEIGHTS = {
     'beer_price': 0.10,
     'michelin_restaurants': 0.20,
@@ -88,10 +86,6 @@ def get_flight_prices(departure_airport, destination_codes):
 
 def calculate_weather_score(weather_data):
     """
-    Calculate weather score based on 3-day average temperature
-    Optimal temperature: 20°C
-    Score = 1 - (abs(temp - 20) / 30)
-    Range: 0.0 to 1.0
     """
     if not weather_data or 'avg_temperature' not in weather_data:
         print("Warning: No weather data available, using default score 0.5")
@@ -107,8 +101,6 @@ def calculate_weather_score(weather_data):
 
 def calculate_qol_score(qol_data):
     """
-    Calculate quality of life score from multiple metrics
-    Each metric is normalized to 0-1 and weighted
     """
     if not qol_data:
         print("Warning: No QoL data available, using default score 0.5")
@@ -140,10 +132,6 @@ def calculate_qol_score(qol_data):
 
 def calculate_flight_score(price):
     """
-    Calculate flight price score
-    Lower price is better
-    Score = 1 - ((price - 50) / 950)
-    Assumes price range: 50-1000 EUR
     """
     if price is None or price <= 0:
         print("Warning: No valid flight price, using default score 0.3")
@@ -158,9 +146,6 @@ def calculate_flight_score(price):
 
 def calculate_total_score(weather_score, qol_score, flight_score, weather_weight=None, qol_weight=None, flight_weight=None):
     """
-    Calculate total weighted score
-    Default: Weather: 30%, QoL: 30%, Flight: 40%
-    Can be customized with weight parameters
     """
     # Use provided weights or fall back to defaults
     w_weather = weather_weight if weather_weight is not None else WEATHER_WEIGHT
@@ -176,12 +161,6 @@ def calculate_total_score(weather_score, qol_score, flight_score, weather_weight
 
 def handler(event, context):
     """
-    Lambda handler to calculate travel index scores
-    Endpoint: POST /travel-recommendations
-    Body: {
-        "departure_airport": "MAD"
-    }
-    Returns top 3 recommended destinations with scores
     """
     print(f"Index calculator invoked with event: {json.dumps(event)}")
 
@@ -193,7 +172,7 @@ def handler(event, context):
             body = event.get('body', {})
 
         departure_airport = body.get('departure_airport', '').strip().upper()
-        alternatives = body.get('alternatives', [])  # Optional alternative airports
+        alternatives = body.get('alternatives', [])
 
         # Get custom weights from request (or use defaults)
         custom_weights = body.get('weights', {})
@@ -203,7 +182,7 @@ def handler(event, context):
 
         # Validate weights sum to approximately 1.0
         total_weight = weather_weight + qol_weight + flight_weight
-        if abs(total_weight - 1.0) > 0.01:  # Allow small floating point errors
+        if abs(total_weight - 1.0) > 0.01:
             return {
                 'statusCode': 400,
                 'headers': {
@@ -268,7 +247,7 @@ def handler(event, context):
     valid_prices = {k: v for k, v in flight_prices.items() if v is not None}
 
     if not valid_prices and alternatives:
-        # No prices available from primary airport, try alternatives
+        print(f"No flight prices available from {departure_airport}, trying alternatives...")
         print(f"No flight prices available from {departure_airport}, trying alternatives...")
 
         for alt in alternatives:
@@ -282,7 +261,7 @@ def handler(event, context):
 
             if alt_valid_prices:
                 print(f"SUCCESS: Found {len(alt_valid_prices)} flight prices from {alt_code}")
-                departure_airport = alt_code  # Switch to this airport
+                departure_airport = alt_code
                 flight_prices = alt_flight_prices
                 break
 
