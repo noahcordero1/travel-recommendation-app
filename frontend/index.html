@@ -489,21 +489,43 @@
         }
 
         function showApp(token) {
-            // Store token for API requests (use localStorage so iframe can access it)
+            console.log('showApp called with token:', token ? 'YES' : 'NO');
+
+            if (!token) {
+                alert('Authentication error: No token received');
+                return;
+            }
+
+            // CRITICAL: Store token FIRST, before anything else
             localStorage.setItem('idToken', token);
+            console.log('Token stored in localStorage');
 
-            // Hide auth screen, show app
-            document.getElementById('auth-screen').style.display = 'none';
-            document.getElementById('app').classList.add('active');
+            // Small delay to ensure localStorage is committed
+            setTimeout(() => {
+                // Hide auth screen, show app
+                document.getElementById('auth-screen').style.display = 'none';
+                document.getElementById('app').classList.add('active');
 
-            // Pass token to iframe via postMessage as backup
-            const iframe = document.getElementById('app-iframe');
-            iframe.onload = function() {
-                iframe.contentWindow.postMessage({
-                    type: 'AUTH_TOKEN',
-                    token: token
-                }, '*');
-            };
+                // Pass token to iframe via postMessage as backup
+                const iframe = document.getElementById('app-iframe');
+
+                // Send token immediately if iframe already loaded
+                if (iframe.contentWindow) {
+                    iframe.contentWindow.postMessage({
+                        type: 'AUTH_TOKEN',
+                        token: token
+                    }, '*');
+                }
+
+                // Also send when iframe loads
+                iframe.onload = function() {
+                    console.log('iframe loaded, sending token via postMessage');
+                    iframe.contentWindow.postMessage({
+                        type: 'AUTH_TOKEN',
+                        token: token
+                    }, '*');
+                };
+            }, 50); // 50ms delay to ensure localStorage is ready
         }
 
         function handleLogout() {

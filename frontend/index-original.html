@@ -610,32 +610,68 @@
         const API_ENDPOINT = 'https://e4ml7tmfog.execute-api.eu-west-1.amazonaws.com';
 
         // Authentication token (read from localStorage - shared with parent page)
-        let authToken = localStorage.getItem('idToken') || null;
+        let authToken = null;
+        let tokenReady = false;
 
-        // Listen for auth token from parent window (backup method)
-        window.addEventListener('message', (event) => {
-            if (event.data && event.data.type === 'AUTH_TOKEN') {
-                authToken = event.data.token;
-                localStorage.setItem('idToken', authToken);
-                console.log('Auth token received via postMessage');
+        // Function to get valid token
+        function getAuthToken() {
+            if (!authToken) {
+                authToken = localStorage.getItem('idToken');
             }
-        });
+            return authToken;
+        }
 
-        // Also check localStorage periodically in case it was set by parent
-        if (!authToken) {
-            const checkToken = setInterval(() => {
+        // Wait for token to be available
+        function waitForToken() {
+            return new Promise((resolve, reject) => {
+                // Check immediately
                 authToken = localStorage.getItem('idToken');
                 if (authToken) {
-                    console.log('Auth token found in localStorage');
-                    clearInterval(checkToken);
+                    console.log('Auth token found immediately');
+                    tokenReady = true;
+                    resolve(authToken);
+                    return;
                 }
-            }, 100);
 
-            // Stop checking after 5 seconds
-            setTimeout(() => clearInterval(checkToken), 5000);
-        } else {
-            console.log('Auth token loaded from localStorage');
+                // Listen for token from parent
+                const messageHandler = (event) => {
+                    if (event.data && event.data.type === 'AUTH_TOKEN') {
+                        authToken = event.data.token;
+                        localStorage.setItem('idToken', authToken);
+                        console.log('Auth token received via postMessage:', authToken ? 'YES' : 'NO');
+                        tokenReady = true;
+                        window.removeEventListener('message', messageHandler);
+                        resolve(authToken);
+                    }
+                };
+                window.addEventListener('message', messageHandler);
+
+                // Poll localStorage
+                let attempts = 0;
+                const checkToken = setInterval(() => {
+                    attempts++;
+                    const token = localStorage.getItem('idToken');
+                    if (token) {
+                        authToken = token;
+                        console.log('Auth token found in localStorage after', attempts, 'attempts');
+                        tokenReady = true;
+                        clearInterval(checkToken);
+                        window.removeEventListener('message', messageHandler);
+                        resolve(authToken);
+                    } else if (attempts > 50) { // 5 seconds
+                        clearInterval(checkToken);
+                        window.removeEventListener('message', messageHandler);
+                        reject(new Error('Auth token not found after 5 seconds'));
+                    }
+                }, 100);
+            });
         }
+
+        // Initialize token on page load
+        waitForToken().catch(err => {
+            console.error('Failed to get auth token:', err);
+            alert('Authentication error. Please log out and log back in.');
+        });
 
         // Display API endpoint
         document.getElementById('apiEndpoint').textContent = API_ENDPOINT + '/weather';
@@ -888,12 +924,18 @@
             countryInput.disabled = true;
 
             try {
-                const headers = {
-                    'Content-Type': 'application/json'
-                };
-                if (authToken) {
-                    headers['Authorization'] = `Bearer ${authToken}`;
+                // Ensure we have a valid token
+                const token = getAuthToken();
+                if (!token) {
+                    throw new Error('Not authenticated. Please refresh the page and log in again.');
                 }
+
+                const headers = {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                };
+
+                console.log('Sending request to resolve-airport with token:', token.substring(0, 20) + '...');
 
                 const response = await fetch(`${API_ENDPOINT}/resolve-airport`, {
                     method: 'POST',
@@ -974,12 +1016,18 @@
             `;
 
             try {
-                const headers = {
-                    'Content-Type': 'application/json'
-                };
-                if (authToken) {
-                    headers['Authorization'] = `Bearer ${authToken}`;
+                // Ensure we have a valid token
+                const token = getAuthToken();
+                if (!token) {
+                    throw new Error('Not authenticated. Please refresh the page and log in again.');
                 }
+
+                const headers = {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                };
+
+                console.log('Sending request to travel-recommendations with token:', token.substring(0, 20) + '...');
 
                 const response = await fetch(`${API_ENDPOINT}/travel-recommendations`, {
                     method: 'POST',
