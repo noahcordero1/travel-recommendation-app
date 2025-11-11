@@ -75,6 +75,17 @@ jobs:
 
           echo "Destinations data uploaded to S3"
 
+      - name: Trigger weather fetcher to populate DynamoDB
+        run: |
+          # Invoke weather_fetcher Lambda to update DynamoDB with new destinations
+          aws lambda invoke \
+            --function-name travel-help-weather-fetcher-dev \
+            --invocation-type Event \
+            --region ${{ env.AWS_REGION }} \
+            /dev/null
+
+          echo "Weather fetcher triggered to update DynamoDB with new destinations"
+
       - name: Deploy frontend to S3
         run: |
           # Upload main auth page (index.html)
